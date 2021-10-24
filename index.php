@@ -182,7 +182,7 @@ $clips = getClips();
 
 <body>
 
-    <div class="main">
+    <div class="main"> 
 
         <div class="m_navbar">
             <div style="background-color: #00796B;" class="wrapper">
