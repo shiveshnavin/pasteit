@@ -3,27 +3,24 @@
 error_reporting(0);
 date_default_timezone_set("Asia/Kolkata");
 
-
-
-
 /*
 CREATE TABLE  `pasteit` ( `id` INT NOT NULL AUTO_INCREMENT , `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `text` TEXT NULL , `link` TEXT NULL , `file` TEXT NULL , PRIMARY KEY (`id`)) 
 */
 $url = getenv("CLEARDB_DATABASE_URL") != NULL ? getenv("CLEARDB_DATABASE_URL") : "mysql://ba2a05339b82cb:45979acf@us-cdbr-east-04.cleardb.com/heroku_483aed96e617ebc?reconnect=true";
 $creds = parse_url($url);
-/*
+
 $GLOBALS["mysql_hostname"] = $creds["host"];
 $GLOBALS["mysql_port"] = "5432";
 $GLOBALS["mysql_username"] = $creds["user"];
 $GLOBALS["mysql_password"] = $creds["pass"];
 $GLOBALS["mysql_database"] = substr($creds["path"], 1);
-*/
 
+/*
 $GLOBALS["mysql_hostname"] = "127.0.0.1";
 $GLOBALS["mysql_username"] = "root";
 $GLOBALS["mysql_password"] = "";
 $GLOBALS["mysql_database"] = "mydb";
-
+*/
 $table = "clip";
 function mysqlc()
 {
