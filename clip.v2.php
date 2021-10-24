@@ -1,6 +1,6 @@
 <?php
 
-error_reporting(E_ALL);
+error_reporting(0);
 date_default_timezone_set("Asia/Kolkata");
 
 
@@ -36,7 +36,22 @@ function mysqlc()
 function truncate($string, $length = 500,  $dots = "...")
 {
     return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+}
 
+function fileUpload()
+{
+    if (!empty($_FILES['uploaded_file'])) {
+        $path = "uploads/";
+        $path = $path . time() . '_' . basename($_FILES['uploaded_file']['name']);
+
+        if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $path)) {
+            echo "<div style='font-size:3vh;padding:6px;width:100%;background-color:green;color:white;'>The file " .  basename($_FILES['uploaded_file']['name']) .
+                " has been uploaded</div>";
+            return '' . $path;
+        } else {
+            echo "There was an error uploading the file, please try again!";
+        }
+    }
 }
 
 function execute($q)
@@ -96,9 +111,60 @@ if ($data != NULL) {
 
     $prompt_msg = "Capthca : Enter aaa to prove you are not a robot.";
 
-    write($data["text"], $data["link"], $data["file"]);
+    write($data["text"], $data["link"], fileUpload());
 }
 
+if (isset($_GET["view"])) {
+    $sql = 'SELECT * FROM `pasteit` where  id=' . $_GET["view"];
+    $results = (execute($sql));
+    if ($results->num_rows > 0) {
+        $to_del = $results->fetch_object();
+        echo '<p>' . $to_del->text . '</p>';
+        echo '<br>';
+        echo  '<p>' . $to_del->link . '</p>';
+        echo '<br>';
+        echo  '<p>' . $to_del->file . '</p>';
+        die;
+    }
+}
+if (isset($_GET["del"])) {
+    $sql = 'SELECT * FROM `pasteit` where  id=' . $_GET["del"];
+    $results = (execute($sql));
+    if ($results->num_rows > 0) {
+
+?>
+
+        <div style=" padding:1px;text-align:center; background-color:black;width:100%;">
+
+
+            <p style=" color:#ff4949">DELETED <br>
+
+
+                <?php
+
+                $to_del = $results->fetch_object();
+                echo $to_del->text;
+                echo '<br>';
+                echo  $to_del->link;
+                echo '<br>';
+
+                $file_pointer =  $to_del->file;
+                if (!unlink($file_pointer)) {
+                    echo ("$file_pointer cannot be deleted due to an error");
+                } else {
+                    echo ("$file_pointer has been deleted");
+                }
+
+                $sql = 'DELETE FROM `pasteit` where  id=' . $_GET["del"];
+                execute($sql);
+                ?>
+                <br>
+            </p>
+
+        </div>
+<?php
+    }
+}
 $clips = getClips();
 ?>
 
@@ -115,10 +181,10 @@ $clips = getClips();
 
         <div class="m_navbar">
             <div style="background-color: #00796B;" class="wrapper">
-                <div style="background-color: transparent;" onclick="location.href='';" class="weighed weight2 rounded">
+                <div style="background-color: transparent;" onclick="location.href='/';" class="weighed weight2 rounded">
                     <h2>Paste It</h2>
                 </div>
-                <div onclick="location.href='';" class="weighed weight1 rounded">
+                <div onclick="location.href='/';" class="weighed weight1 rounded">
                     <h2>Refresh</h2>
                 </div>
             </div>
@@ -126,7 +192,7 @@ $clips = getClips();
 
         <div class="inputarea">
 
-            <form action="" method="post" id="clip">
+            <form enctype="multipart/form-data" action="" method="post" id="clip">
 
                 <label for="text">Paste Text</label>
                 <textarea id="text" name="text"></textarea>
@@ -137,12 +203,12 @@ $clips = getClips();
                 <br>
                 <br>
                 <label for="file">Upload File</label>
-                <br>
+                <br><input style="font-size: 2.5vh;" id="file" type="file" name="uploaded_file"></input>
                 <div onclick="document.getElementById('file').click();" class="parent">
-                    <span class="child"><br><input style="font-size: 2.5vh;" id="file" type="file" name="file"></input></span>
+                    <span class="child"><br></span>
                 </div>
                 <div>
-                   
+
 
 
                 </div>
@@ -174,16 +240,16 @@ $clips = getClips();
                     $text = $v['text'];
                     $file = $v['file'];
                 ?>
-                    <ul style="width: auto;" >
-                        <div >  <span class="subtitle"><?php echo $v["datetime"]; ?><br></span>
+                    <ul style="width: auto;">
+                        <div> <span class="subtitle"><?php echo $v["datetime"]; ?><br></span>
                             <?php trunc_p_if($text) ?>
                             <?php link_p_if($link) ?>
                             <?php link_p_if($file) ?>
-                          
+
                         </div>
                         <div class="center wrapper">
-                            <button style="margin-right: 1vh;" class="weight1 button blue">VIEW</button>
-                            <button class="weight1 button red">Delete</button>
+                            <button style="margin-right: 1vh;" class="weight1 button blue" onclick="window.location.href='?view=<?php echo $v['id']; ?>';">VIEW</button>
+                            <button class="weight1 button red" onclick="window.location.href='?del=<?php echo $v['id']; ?>';">DELETE</button>
 
                         </div>
                     </ul>
@@ -311,6 +377,10 @@ $clips = getClips();
         background-color: #F44336;
     }
 
+    a {
+        text-decoration: none;
+    }
+
     .button {
         text-decoration: none;
         color: white;
@@ -329,6 +399,7 @@ $clips = getClips();
         box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.2);
         -webkit-transition: all .2s;
         transition: all .2s;
+        cursor: pointer;
     }
 
     .subtitle {
