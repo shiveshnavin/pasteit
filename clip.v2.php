@@ -33,12 +33,17 @@ function mysqlc()
         throw new Exception("MySQL connection could not be established: " . $mysqli->connect_error);
     return $mysqli;
 }
+function truncate($string, $length = 500,  $dots = "...")
+{
+    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+
+}
 
 function execute($q)
 {
     $mysqli = mysqlc();
     $query = $mysqli->query($q);
-    echo $mysqli->insert_id;
+    // echo $mysqli->insert_id;
     $mysqli->close();
     return $query;
 }
@@ -58,12 +63,12 @@ function write($text, $link, $file)
         $file = "";
     }
     $dbc = mysqlc();
-    $text = mysqli_real_escape_string($dbc, $_REQUEST['text']);
-    $link = mysqli_real_escape_string($dbc, $_REQUEST['link']);
-    $file = mysqli_real_escape_string($dbc, $_REQUEST['file']);
+    $text = mysqli_real_escape_string($dbc, $text);
+    $link = mysqli_real_escape_string($dbc, $link);
+    $file = mysqli_real_escape_string($dbc, $file);
 
-    $sql =  "INSERT INTO `pasteit` (`id`, `datetime`, `text`, `link`, `file`) VALUES (NULL, current_timestamp(), NULL, 'test', 'test'), (NULL, current_timestamp(), '$text', '$link', '$file')";
-    echo $sql;
+    $sql =  "INSERT INTO `pasteit` (`id`, `datetime`, `text`, `link`, `file`) VALUES (NULL, current_timestamp(), '$text', '$link', '$file')";
+    // echo $sql;
     execute($sql);
 }
 
@@ -75,7 +80,7 @@ function getClips()
     while ($row = $results->fetch_assoc()) {
         array_push($clips, $row);
     }
-    echo json_encode($clips);
+    // echo json_encode($clips);
 
     return $clips;
 }
@@ -137,6 +142,7 @@ $clips = getClips();
                     <span class="child"><br><input style="font-size: 2.5vh;" id="file" type="file" name="file"></input></span>
                 </div>
                 <div>
+                   
 
 
                 </div>
@@ -145,21 +151,53 @@ $clips = getClips();
             </form>
 
         </div>
+        <hr>
+        <div class="outputarea">
 
-        <div id="outputarea">
+            <table>
+                <?php
+                function link_p_if($data)
+                {
+                    if ($data != NULL && strlen($data) > 0) {
+                        echo "<p><a href='$data'>$data</a></p>";
+                    }
+                }
+                function trunc_p_if($data)
+                {
+                    if ($data != NULL && strlen($data) > 0) {
+                        $trunc = truncate($data);
+                        echo "<p>$trunc</p>";
+                    }
+                }
+                foreach ($clips as $v) {
+                    $link = $v['link'];
+                    $text = $v['text'];
+                    $file = $v['file'];
+                ?>
+                    <ul style="width: auto;" >
+                        <div >  <span class="subtitle"><?php echo $v["datetime"]; ?><br></span>
+                            <?php trunc_p_if($text) ?>
+                            <?php link_p_if($link) ?>
+                            <?php link_p_if($file) ?>
+                          
+                        </div>
+                        <div class="center wrapper">
+                            <button style="margin-right: 1vh;" class="weight1 button blue">VIEW</button>
+                            <button class="weight1 button red">Delete</button>
 
-            <?php
+                        </div>
+                    </ul>
+                    <hr>
 
-            foreach ($clips as $v) {
-            ?>
-                <div id="row"></div>
+                <?php
+                }
+                ?>
+            </table>
 
-                AAA
+
+
         </div>
 
-    <?php
-            }
-    ?>
 
     </div>
 
@@ -167,6 +205,22 @@ $clips = getClips();
 
 
 <style>
+    ul {
+        margin-left: 7px;
+        padding-left: 7px;
+        margin-bottom: 4px;
+        margin-top: 4px;
+    }
+
+    .center {
+        text-align: center;
+        align-items: center;
+    }
+
+    .outputarea {
+        margin: 1vh;
+    }
+
     body {
         margin: 0px;
         font-size: 2.5vh;
@@ -218,6 +272,7 @@ $clips = getClips();
     }
 
     .wrapper {
+        flex-wrap: wrap;
         display: flex;
         padding: 4px;
     }
@@ -241,10 +296,45 @@ $clips = getClips();
     }
 
     .weight3 {
-        flex: 2;
+        flex: 3;
     }
 
+    .green {
+        background-color: #66BB6A;
+    }
 
+    .blue {
+        background-color: #1565C0;
+    }
+
+    .red {
+        background-color: #F44336;
+    }
+
+    .button {
+        text-decoration: none;
+        color: white;
+        align-self: center;
+        min-width: 200px;
+        max-height: 100px;
+        height: 7vh;
+        max-width: 80vh;
+        padding: 12px 25px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border: 0;
+        border-radius: 7px;
+        outline: 0;
+        box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.2);
+        -webkit-transition: all .2s;
+        transition: all .2s;
+    }
+
+    .subtitle {
+        font-size: 2vh;
+        color: #616161;
+    }
 
     /****FOTNS****/
     h1 {
@@ -257,6 +347,11 @@ $clips = getClips();
 
     p {
         font-size: 3.0vh;
+    }
+
+    .button {
+        font-size: 2.5vh;
+
     }
 </style>
 
