@@ -176,6 +176,8 @@ $clips = getClips();
 <head>
     <title>PasteIt</title>
     <meta name="theme-color" content="#00796B" />
+    <link href="http://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet" type="text/css" />
+
 </head>
 
 <body>
@@ -184,9 +186,10 @@ $clips = getClips();
 
         <div class="m_navbar">
             <div style="background-color: #00796B;" class="wrapper">
-                <div style="background-color: transparent;" onclick="location.href='/';" class="weighed weight2 rounded">
-                    <h2>Paste It</h2>
-                </div>
+            <a class="weighed weight2 rounded" style="background-color: transparent;" href="/">
+                <div  onclick="location.href='/';" >
+                <h2 style="font-family: 'Pacifico', serif;">Paste It</h2></div></a>
+
                 <div onclick="location.href='/';" class="weighed weight1 rounded">
                     <h2>Refresh</h2>
                 </div>
