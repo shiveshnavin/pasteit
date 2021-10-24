@@ -37,7 +37,7 @@ function truncate($string, $length = 500,  $dots = "...")
 
 function fileUpload()
 {
-    if (!empty($_FILES['uploaded_file'])) {
+    if (!empty($_FILES['uploaded_file']) && !empty($_FILES['uploaded_file']['name'])) {
         $path = "uploads/";
         $path = $path . time() . '_' . basename($_FILES['uploaded_file']['name']);
 
@@ -70,6 +70,11 @@ function write($text, $link, $file)
     }
     if ($link == NULL) {
         $link = "";
+    } else {
+        if (substr($link, 0, 4) === "http") {
+        } else {
+            $link = 'http://' . $link;
+        }
     }
     if ($file == NULL) {
         $file = "";
@@ -146,12 +151,13 @@ if (isset($_GET["del"])) {
                 echo '<br>';
 
                 $file_pointer =  $to_del->file;
-                if (!unlink($file_pointer)) {
-                    echo ("$file_pointer cannot be deleted due to an error");
-                } else {
-                    echo ("$file_pointer has been deleted");
+                if (!empty($file_pointer)) {
+                    if (!unlink($file_pointer)) {
+                        echo ("$file_pointer cannot be deleted due to an error");
+                    } else {
+                        echo ("$file_pointer has been deleted");
+                    }
                 }
-
                 $sql = 'DELETE FROM `pasteit` where  id=' . $_GET["del"];
                 execute($sql);
                 ?>
@@ -245,8 +251,8 @@ $clips = getClips();
 
                         </div>
                         <div class="center wrapper">
-                            <button style="margin-right: 1vh;" class="weight1 button blue" onclick="window.location.href='?view=<?php echo $v['id']; ?>';">VIEW</button>
-                            <button class="weight1 button red" onclick="window.location.href='?del=<?php echo $v['id']; ?>';">DELETE</button>
+                            <a style="margin-right: 1vh;" class="weight1 button blue" href='?view=<?php echo $v['id']; ?>'>VIEW</a>
+                            <a class="weight1 button red" href='?del=<?php echo $v['id']; ?>'>DELETE</a>
 
                         </div>
                     </ul>
@@ -384,7 +390,6 @@ $clips = getClips();
         align-self: center;
         min-width: 200px;
         max-height: 100px;
-        height: 7vh;
         max-width: 80vh;
         padding: 12px 25px;
         font-size: 12px;
