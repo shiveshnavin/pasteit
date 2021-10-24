@@ -4,33 +4,11 @@ error_reporting(E_ALL);
 date_default_timezone_set("Asia/Kolkata");
 
 
-$data = $_POST;
-if ($data != NULL) {
-    function prompt($prompt_msg)
-    {
-        echo ("<script type='text/javascript'> var answer = prompt('" . $prompt_msg . "'); </script>");
-        $answer = "<script type='text/javascript'> document.write(answer); </script>";
-        return ($answer);
-    }
-
-    $prompt_msg = "Capthca : Enter aaa to prove you are not a robot.";
-}
 
 
-if ($_GET["cliph"]) {
-    if (!$_GET["secure"] || $_GET["secure"] == "0") {
-        echo "<script> alert('Seems You Are A BOT !!'); window.location.href=`index.php?_cliph=" . $_GET["cliph"] . "` </script>";
-        die;
-    }
-} else if ($_GET["clip"]) {
-    if (!$_GET["secure"] || $_GET["secure"] == "0") {
-
-        echo "<script> alert('Seems You Are A BOT !!'); window.location.href=`index.php?_clip=" . $_GET["clip"] . "` </script>";
-
-        die;
-    }
-}
-
+/*
+CREATE TABLE  `pasteit` ( `id` INT NOT NULL AUTO_INCREMENT , `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `text` TEXT NULL , `link` TEXT NULL , `file` TEXT NULL , PRIMARY KEY (`id`)) 
+*/
 $url = getenv("CLEARDB_DATABASE_URL") != NULL ? getenv("CLEARDB_DATABASE_URL") : "mysql://ba2a05339b82cb:45979acf@us-cdbr-east-04.cleardb.com/heroku_483aed96e617ebc?reconnect=true";
 $creds = parse_url($url);
 /*
@@ -58,14 +36,67 @@ function mysqlc()
 
 function execute($q)
 {
-
     $mysqli = mysqlc();
     $query = $mysqli->query($q);
+    echo $mysqli->insert_id;
     $mysqli->close();
     return $query;
 }
 
+function write($text, $link, $file)
+{
+    if ($text == NULL && $link == NULL && $file == NULL) {
+        return;
+    }
+    if ($text == NULL) {
+        $text = "";
+    }
+    if ($link == NULL) {
+        $link = "";
+    }
+    if ($file == NULL) {
+        $file = "";
+    }
+    $dbc = mysqlc();
+    $text = mysqli_real_escape_string($dbc, $_REQUEST['text']);
+    $link = mysqli_real_escape_string($dbc, $_REQUEST['link']);
+    $file = mysqli_real_escape_string($dbc, $_REQUEST['file']);
+
+    $sql =  "INSERT INTO `pasteit` (`id`, `datetime`, `text`, `link`, `file`) VALUES (NULL, current_timestamp(), NULL, 'test', 'test'), (NULL, current_timestamp(), '$text', '$link', '$file')";
+    echo $sql;
+    execute($sql);
+}
+
+function getClips()
+{
+    $results = (execute("SELECT * FROM  `pasteit`  ORDER BY  `datetime` DESC "));
+
+    $clips = array();
+    while ($row = $results->fetch_assoc()) {
+        array_push($clips, $row);
+    }
+    echo json_encode($clips);
+
+    return $clips;
+}
+
+$data = $_POST;
+if ($data != NULL) {
+    function prompt($prompt_msg)
+    {
+        echo ("<script type='text/javascript'> var answer = prompt('" . $prompt_msg . "'); </script>");
+        $answer = "<script type='text/javascript'> document.write(answer); </script>";
+        return ($answer);
+    }
+
+    $prompt_msg = "Capthca : Enter aaa to prove you are not a robot.";
+
+    write($data["text"], $data["link"], $data["file"]);
+}
+
+$clips = getClips();
 ?>
+
 <html>
 
 <head>
@@ -114,6 +145,21 @@ function execute($q)
             </form>
 
         </div>
+
+        <div id="outputarea">
+
+            <?php
+
+            foreach ($clips as $v) {
+            ?>
+                <div id="row"></div>
+
+                AAA
+        </div>
+
+    <?php
+            }
+    ?>
 
     </div>
 
